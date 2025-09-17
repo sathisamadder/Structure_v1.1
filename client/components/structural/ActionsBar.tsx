@@ -51,16 +51,6 @@ export default function ActionsBar({ data, onChangeCosts, onLoad }: Props){
 
   return (
     <div className="flex flex-wrap items-end justify-between gap-3 p-3 bg-muted rounded-md">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div>
-          <Label>Concrete rate (currency/m³)</Label>
-          <Input type="number" value={data.costs.concreteRatePerM3} onChange={(e)=>onChangeCosts({ ...data.costs, concreteRatePerM3: parseFloat(e.target.value||"0") })} />
-        </div>
-        <div>
-          <Label>Steel rate (currency/kg)</Label>
-          <Input type="number" value={data.costs.steelRatePerKg} onChange={(e)=>onChangeCosts({ ...data.costs, steelRatePerKg: parseFloat(e.target.value||"0") })} />
-        </div>
-      </div>
       <div className="flex items-center gap-2">
         <Button variant="outline" onClick={saveLocal}>Save (local)</Button>
         <Button variant="outline" onClick={loadLocal}>Load (local)</Button>
