@@ -52,7 +52,7 @@ export default function Index() {
               <div className="grid sm:grid-cols-3 gap-4 text-sm">
                 <Stat label="Floors" value={`${data.building.floors}`} />
                 <Stat label="Floor Area (per floor)" value={`${round(sum(data.grid.xSpacingsM)*round(sum(data.grid.ySpacingsM),2),2)} m²`} />
-                <Stat label="Estimated Cost" value={`${results.cost.totalCost.toLocaleString()} ৳`} />
+                <Stat label="Estimated Cost" value={`BDT ${results.cost.totalCost.toLocaleString()}`} />
               </div>
             </Card>
           </div>
