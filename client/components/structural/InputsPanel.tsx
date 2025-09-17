@@ -86,6 +86,35 @@ export default function InputsPanel({ building, onChange }: Props) {
           </Select>
         </div>
       </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label>Structural system</Label>
+          <Select value={building.structuralSystem||"rc_mrf"} onValueChange={(v)=>{
+            const map: any = { rc_mrf: 5.0, rc_dual: 6.0, shear_wall: 4.0 };
+            onChange({ ...building, structuralSystem: v as any, responseModificationR: map[v as keyof typeof map]});
+          }}>
+            <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="rc_mrf">RC Moment Frame</SelectItem>
+              <SelectItem value="rc_dual">RC Dual (Frame+Wall)</SelectItem>
+              <SelectItem value="shear_wall">Shear Wall System</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Zone factor Z</Label>
+          <Input type="number" step="0.01" value={building.seismicZoneFactorZ ?? 0} onChange={(e)=>onChange({ ...building, seismicZoneFactorZ: parseFloat(e.target.value||"0") })} />
+        </div>
+        <div>
+          <Label>Importance factor I</Label>
+          <Input type="number" step="0.1" value={building.importanceFactorI ?? 1} onChange={(e)=>onChange({ ...building, importanceFactorI: parseFloat(e.target.value||"1") })} />
+        </div>
+        <div>
+          <Label>Response reduction R</Label>
+          <Input type="number" step="0.1" value={building.responseModificationR ?? 5} onChange={(e)=>onChange({ ...building, responseModificationR: parseFloat(e.target.value||"5") })} />
+        </div>
+      </div>
     </div>
   );
 }
