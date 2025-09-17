@@ -50,6 +50,10 @@ export function defaultProject(): ProjectData {
     foundationType: "isolated",
     locationText: "",
     finishesLoadKPa: 1.5,
+    structuralSystem: "rc_mrf",
+    seismicZoneFactorZ: 0.2,
+    importanceFactorI: 1.0,
+    responseModificationR: 5.0,
   };
   const costs: CostInputs = {
     concreteRatePerM3: 9000,
@@ -346,7 +350,42 @@ export function analyze(project: ProjectData): AnalysisResults {
     totalCost: round(concreteM3 * costs.concreteRatePerM3 + steelKg * costs.steelRatePerKg, 0),
   };
 
-  return { columns, beams, slabs, footings, boq, cost, warnings };
+  const bnbc = seismicBNBC(project);
+
+  return { columns, beams, slabs, footings, boq, cost, warnings, bnbc };
+}
+
+// Simplified BNBC 2020 equivalent static seismic calculations
+export function seismicBNBC(project: ProjectData) {
+  const { grid, building } = project;
+  const floors = building.floors; const h = building.floorHeightM * floors;
+  const Ct = building.structuralSystem === 'shear_wall' ? 0.05 : building.structuralSystem === 'rc_dual' ? 0.055 : 0.075;
+  const xExp = 0.75;
+  const T = Ct * Math.pow(Math.max(h, 1), xExp);
+  // Seismic weight estimation (kN)
+  const area = sum(grid.xSpacingsM) * sum(grid.ySpacingsM);
+  const slabDL = slabSelfWeightKPa(building.slabThicknessM) + building.finishesLoadKPa; // kPa
+  const LL = USAGES[building.usage].liveLoadKPa; // kPa
+  const beamLen = sum(grid.xSpacingsM) * (grid.ny + 1) + sum(grid.ySpacingsM) * (grid.nx + 1);
+  const D_per_floor_kN = slabDL * area + beamSelfWeightKNperm(building.beamWidthM, building.beamDepthM) * beamLen;
+  const W = floors * (D_per_floor_kN + 0.25 * LL * area);
+  // Site/seismic coefficients (simplified)
+  const S_site = building.soil === 'soft' ? 2.5 : building.soil === 'stiff' ? 1.5 : 2.0;
+  const Z = building.seismicZoneFactorZ ?? 0.2; const I = building.importanceFactorI ?? 1.0; const R = building.responseModificationR ?? 5.0;
+  let Cs = (Z * I * S_site) / Math.max(R, 1);
+  Cs = Math.max(0.044 * Z * I, Math.min(Cs, 0.5));
+  const V = Cs * W;
+  // Triangular distribution
+  const storyForces: {story:number,heightM:number,weightKN:number,lateralForceKN:number,shearAboveKN:number}[] = [];
+  let sum_wi_hi = 0; const wi = W / floors;
+  for (let k=1;k<=floors;k++){ sum_wi_hi += wi * k * building.floorHeightM; }
+  for (let k=1;k<=floors;k++){
+    const hk = k * building.floorHeightM; const Fx = V * (wi*hk) / sum_wi_hi;
+    storyForces.push({ story: k, heightM: hk, weightKN: wi, lateralForceKN: round(Fx,1), shearAboveKN: 0 });
+  }
+  let acc = 0; for (let i=floors-1;i>=0;i--){ acc += storyForces[i+1]?.lateralForceKN ?? 0; storyForces[i].shearAboveKN = round(V - acc,1); }
+
+  return { periodT: round(T,3), seismicWeightKN: round(W,0), Cs: round(Cs,3), baseShearKN: round(V,0), storyForces };
 }
 
 export function round(v: number, d: number): number {
