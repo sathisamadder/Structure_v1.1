@@ -130,9 +130,9 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function Th({ children }: { children: React.ReactNode }) {
-  return <th className="px-2 py-2 text-xs font-medium">{children}</th>;
+function Th({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <th className={"px-2 py-2 text-xs font-medium " + (className || "")}>{children}</th>;
 }
-function Td({ children }: { children: React.ReactNode }) {
-  return <td className="px-2 py-2">{children}</td>;
+function Td({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <td className={"px-2 py-2 " + (className || "")}>{children}</td>;
 }
