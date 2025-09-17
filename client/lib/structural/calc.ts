@@ -2,16 +2,16 @@ import { AnalysisResults, BeamResult, BOQItem, BuildingSpec, ColumnResult, CostI
 
 // Constants and catalogs
 export const SOILS: Record<SoilConditionKey, SoilCondition> = {
-  soft: { key: "soft", name: "নরম মাটি", bearingCapacityKPa: 100 },
-  medium: { key: "medium", name: "মাঝারি মাটি", bearingCapacityKPa: 200 },
-  stiff: { key: "stiff", name: "শক্ত মাটি", bearingCapacityKPa: 300 },
+  soft: { key: "soft", name: "Soft soil", bearingCapacityKPa: 100 },
+  medium: { key: "medium", name: "Medium soil", bearingCapacityKPa: 200 },
+  stiff: { key: "stiff", name: "Stiff soil", bearingCapacityKPa: 300 },
 };
 
 export const USAGES: Record<UsageKey, Usage> = {
-  residential: { key: "residential", name: "আবাসিক", liveLoadKPa: 2.0 },
-  office: { key: "office", name: "অফিস", liveLoadKPa: 2.5 },
-  commercial: { key: "commercial", name: "বাণিজ্যিক", liveLoadKPa: 3.0 },
-  industrial: { key: "industrial", name: "ইন্ডাস্ট্রিয়াল", liveLoadKPa: 5.0 },
+  residential: { key: "residential", name: "Residential", liveLoadKPa: 2.0 },
+  office: { key: "office", name: "Office", liveLoadKPa: 2.5 },
+  commercial: { key: "commercial", name: "Commercial", liveLoadKPa: 3.0 },
+  industrial: { key: "industrial", name: "Industrial", liveLoadKPa: 5.0 },
 };
 
 const gammaConcreteKNm3 = 25; // unit weight
@@ -198,7 +198,7 @@ export function analyze(project: ProjectData): AnalysisResults {
         suggestedSizeM: { b: pick.b, h: pick.h },
         bars: pick.bars,
         axialCapacityKN: pick.phiPn,
-        warnings: pick.phiPn < Pu ? ["কলামের ধারণ ক্ষমতা প্রয়োজনীয় Pu থেকে কম"] : [],
+        warnings: pick.phiPn < Pu ? ["Column axial capacity is less than required Pu"] : [],
       };
       columns.push(col);
     }
@@ -296,7 +296,7 @@ export function analyze(project: ProjectData): AnalysisResults {
       bearingPressureKPa: approxService / (sizeM * sizeM),
       warnings: [],
     };
-    if (f.bearingPressureKPa > qAllow) f.warnings.push("ফুটিং আকার বৃদ্ধি প্রয়োজন (বেয়ারিং চাপ বেশি)");
+    if (f.bearingPressureKPa > qAllow) f.warnings.push("Increase footing size (bearing pressure high)");
     footings.push(f);
   }
 
@@ -336,8 +336,8 @@ export function analyze(project: ProjectData): AnalysisResults {
   }
 
   const boq: BOQItem[] = [
-    { name: "কংক্রিট (মোট)", unit: "m³", quantity: round(concreteM3, 2) },
-    { name: "স্টিল (মোট)", unit: "kg", quantity: round(steelKg, 1) },
+    { name: "Concrete (total)", unit: "m³", quantity: round(concreteM3, 2) },
+    { name: "Steel (total)", unit: "kg", quantity: round(steelKg, 1) },
   ];
 
   const cost: CostSummary = {
