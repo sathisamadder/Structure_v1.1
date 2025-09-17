@@ -43,8 +43,13 @@ export interface BuildingSpec {
   foundationType: "isolated" | "combined" | "raft";
   locationText: string;
   basicWindSpeedMS?: number; // optional, for future use
-  seismicZone?: string; // optional, for future use
+  seismicZone?: string; // optional text
   finishesLoadKPa: number; // superimposed dead load on slab (kPa)
+  // BNBC 2020 seismic simplified inputs
+  structuralSystem?: "rc_mrf" | "rc_dual" | "shear_wall";
+  seismicZoneFactorZ?: number; // zone coefficient Z
+  importanceFactorI?: number; // Importance factor I
+  responseModificationR?: number; // R
 }
 
 export interface ColumnResult {
@@ -105,6 +110,22 @@ export interface CostSummary {
   totalCost: number;
 }
 
+export interface SeismicStoryForce {
+  story: number;
+  heightM: number;
+  weightKN: number;
+  lateralForceKN: number;
+  shearAboveKN: number;
+}
+
+export interface BNBCSeismicResult {
+  periodT: number;
+  seismicWeightKN: number;
+  Cs: number;
+  baseShearKN: number;
+  storyForces: SeismicStoryForce[];
+}
+
 export interface AnalysisResults {
   columns: ColumnResult[];
   beams: BeamResult[];
@@ -113,6 +134,7 @@ export interface AnalysisResults {
   boq: BOQItem[];
   cost: CostSummary;
   warnings: string[];
+  bnbc?: BNBCSeismicResult;
 }
 
 export interface ProjectData {
