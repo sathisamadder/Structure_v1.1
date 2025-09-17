@@ -123,6 +123,10 @@ export default function GridEditor({ grid, onGridChange }: Props) {
           <div className="flex items-center gap-2 text-xs"><span>Opacity</span><input type="range" min={0} max={1} step={0.05} value={imageOpacity} onChange={(e)=>setImageOpacity(parseFloat(e.target.value))} /></div>
         </div>
       </div>
+
+      {/* ETABS-like quick generators */}
+      <QuickGenerators grid={grid} onGridChange={onGridChange} />
+
       <div className="grid grid-cols-[auto_1fr] gap-3">
         <div className="space-y-2">
           <div className="text-xs font-medium">X bay spacing (m)</div>
@@ -161,6 +165,72 @@ export default function GridEditor({ grid, onGridChange }: Props) {
       </div>
     </div>
   );
+
+function QuickGenerators({ grid, onGridChange }: { grid: GridSpec; onGridChange: (g: GridSpec)=>void }){
+  const [xBays, setXBays] = useState(grid.nx);
+  const [xSpacing, setXSpacing] = useState(grid.xSpacingsM[0]||5);
+  const [yBays, setYBays] = useState(grid.ny);
+  const [ySpacing, setYSpacing] = useState(grid.ySpacingsM[0]||4);
+
+  const apply = (axis: 'x'|'y', bays: number, spacing: number) => {
+    if (bays < 1 || spacing <= 0) return;
+    if (axis==='x'){
+      const xSpacingsM = Array.from({length: bays}, ()=>spacing);
+      const nx = bays; const ny = grid.ny;
+      const columns = rebuildColumns(nx, ny, grid.columns);
+      const xLabels = Array.from({length: nx+1}, (_,i)=>String(i+1));
+      onGridChange({ ...grid, nx, xSpacingsM, columns, xLabels });
+    } else {
+      const ySpacingsM = Array.from({length: bays}, ()=>spacing);
+      const nx = grid.nx; const ny = bays;
+      const columns = rebuildColumns(nx, ny, grid.columns);
+      const yLabels = Array.from({length: ny+1}, (_,i)=>String.fromCharCode(65+i));
+      onGridChange({ ...grid, ny, ySpacingsM, columns, yLabels });
+    }
+  };
+
+  const allCols = (on: boolean)=>{
+    const cols = Array.from({length: grid.nx+1}, (_,i)=>Array.from({length: grid.ny+1}, (_,j)=>on));
+    onGridChange({ ...grid, columns: cols });
+  };
+
+  return (
+    <div className="rounded-md border p-2 bg-white/60">
+      <div className="flex flex-wrap items-end gap-2 text-xs">
+        <div className="flex items-center gap-2">
+          <span className="font-medium">Quick X</span>
+          <Input className="w-16" type="number" min={1} value={xBays} onChange={(e)=>setXBays(parseInt(e.target.value||'1'))} />
+          <span>bays</span>
+          <Input className="w-20" type="number" step="0.1" value={xSpacing} onChange={(e)=>setXSpacing(parseFloat(e.target.value||'0'))} />
+          <span>m spacing</span>
+          <Button size="sm" onClick={()=>apply('x', xBays, xSpacing)}>Apply</Button>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="font-medium">Quick Y</span>
+          <Input className="w-16" type="number" min={1} value={yBays} onChange={(e)=>setYBays(parseInt(e.target.value||'1'))} />
+          <span>bays</span>
+          <Input className="w-20" type="number" step="0.1" value={ySpacing} onChange={(e)=>setYSpacing(parseFloat(e.target.value||'0'))} />
+          <span>m spacing</span>
+          <Button size="sm" onClick={()=>apply('y', yBays, ySpacing)}>Apply</Button>
+        </div>
+        <div className="ml-auto flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={()=>allCols(true)}>Enable all columns</Button>
+          <Button size="sm" variant="outline" onClick={()=>allCols(false)}>Disable all columns</Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function rebuildColumns(nx: number, ny: number, prev: boolean[][]){
+  const cols: boolean[][] = Array.from({length: nx+1}, (_,i)=>Array.from({length: ny+1}, (_,j)=> true));
+  for (let i=0;i<=Math.min(nx, prev.length-1); i++){
+    for (let j=0;j<=Math.min(ny, (prev[i]?.length||0)-1); j++){
+      cols[i][j] = prev[i]?.[j] ?? true;
+    }
+  }
+  return cols;
+}
 }
 
 function SvgGrid({ grid, onToggle }: { grid: GridSpec; onToggle: (i:number,j:number)=>void }) {
