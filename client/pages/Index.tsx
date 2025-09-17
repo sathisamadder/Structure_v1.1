@@ -52,7 +52,7 @@ export default function Index() {
               <div className="grid sm:grid-cols-3 gap-4 text-sm">
                 <Stat label="Floors" value={`${data.building.floors}`} />
                 <Stat label="Floor Area (per floor)" value={`${round(sum(data.grid.xSpacingsM)*round(sum(data.grid.ySpacingsM),2),2)} m²`} />
-                <Stat label="Estimated Cost" value={`BDT ${results.cost.totalCost.toLocaleString()}`} />
+                <Stat label="Base Shear (BNBC)" value={results.bnbc ? `${round(results.bnbc.baseShearKN,0)} kN` : "-"} />
               </div>
             </Card>
           </div>
@@ -71,7 +71,7 @@ function Header(){
           <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-sky-500 to-blue-700 grid place-items-center text-white font-bold">Σ</div>
           <div>
             <div className="text-lg font-extrabold tracking-tight">Structural Analysis Tool</div>
-            <div className="text-xs text-muted-foreground">Preliminary design — columns, beams, slabs, footings, BOQ, 3D</div>
+            <div className="text-xs text-muted-foreground">Preliminary design — columns, beams, slabs, footings, seismic (BNBC 2020), 3D</div>
           </div>
         </div>
         <div className="hidden md:flex items-center gap-3 text-xs text-muted-foreground">
