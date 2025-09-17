@@ -98,24 +98,34 @@ export default function ResultsPanel({ results }: { results: AnalysisResults }) 
           </table>
         </div>
       </Section>
-      <Section title="BOQ & Cost">
-        <div className="overflow-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left bg-muted">
-                <Th>Item</Th><Th>Unit</Th><Th>Quantity</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {results.boq.map((q,idx)=> (
-                <tr key={idx} className="border-b">
-                  <Td>{q.name}</Td><Td>{q.unit}</Td><Td>{q.quantity}</Td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="text-right text-sm mt-2 font-semibold">Estimated cost: BDT {results.cost.totalCost.toLocaleString()}</div>
+      <Section title="Seismic (BNBC 2020) – Equivalent Static">
+        {results.bnbc ? (
+          <div className="space-y-2">
+            <div className="text-xs">T = {results.bnbc.periodT}s, W = {results.bnbc.seismicWeightKN} kN, C<sub>s</sub> = {results.bnbc.Cs}, V = {results.bnbc.baseShearKN} kN</div>
+            <div className="overflow-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left bg-muted">
+                    <Th>#</Th><Th>Height (m)</Th><Th>w<sub>x</sub> (kN)</Th><Th>F<sub>x</sub> (kN)</Th><Th>V above (kN)</Th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {results.bnbc.storyForces.map((s)=>(
+                    <tr key={s.story} className="border-b">
+                      <Td>{s.story}</Td>
+                      <Td>{round(s.heightM,2)}</Td>
+                      <Td>{round(s.weightKN,0)}</Td>
+                      <Td>{round(s.lateralForceKN,1)}</Td>
+                      <Td>{round(s.shearAboveKN,1)}</Td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : (
+          <div className="text-sm text-muted-foreground">Add seismic inputs in the left panel to compute BNBC 2020 base shear.</div>
+        )}
       </Section>
     </div>
   );
