@@ -115,7 +115,7 @@ export default function ResultsPanel({ results }: { results: AnalysisResults }) 
             </tbody>
           </table>
         </div>
-        <div className="text-right text-sm mt-2 font-semibold">Estimated cost: {results.cost.totalCost.toLocaleString()} ৳</div>
+        <div className="text-right text-sm mt-2 font-semibold">Estimated cost: BDT {results.cost.totalCost.toLocaleString()}</div>
       </Section>
     </div>
   );
